@@ -5,9 +5,10 @@ import (
 	"log"
 	"net/http"
 	"time"
-	"web-app/internal/repository/psql"
-	"web-app/internal/service"
-	"web-app/internal/transport/rest"
+
+	"github.com/GOLANG-NINJA/crud-app/internal/repository/psql"
+	"github.com/GOLANG-NINJA/crud-app/internal/service"
+	"github.com/GOLANG-NINJA/crud-app/internal/transport/rest"
 
 	_ "github.com/lib/pq"
 )

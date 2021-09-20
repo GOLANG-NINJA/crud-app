@@ -2,7 +2,8 @@ package service
 
 import (
 	"context"
-	"web-app/internal/domain"
+
+	"github.com/GOLANG-NINJA/crud-app/internal/domain"
 )
 
 type BooksRepository interface {

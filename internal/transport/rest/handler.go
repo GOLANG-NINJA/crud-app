@@ -7,7 +7,8 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"web-app/internal/domain"
+
+	"github.com/GOLANG-NINJA/crud-app/internal/domain"
 
 	"github.com/gorilla/mux"
 )

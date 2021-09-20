@@ -1,4 +1,4 @@
-module web-app
+module github.com/GOLANG-NINJA/crud-app
 
 go 1.17
 

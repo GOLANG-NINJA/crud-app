@@ -3,7 +3,8 @@ package psql
 import (
 	"context"
 	"database/sql"
-	"web-app/internal/domain"
+
+	"github.com/GOLANG-NINJA/crud-app/internal/domain"
 )
 
 type Books struct {
