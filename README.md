@@ -6,7 +6,7 @@
 - postgres 
 
 ### Запуск
-```go build -o app cmd/main.go & ./app```
+```go build -o app cmd/main.go && ./app```
 
 Для postgres можно использовать Docker
 
