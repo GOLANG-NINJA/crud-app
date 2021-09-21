@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/GOLANG-NINJA/crud-app/internal/domain"
 
@@ -82,19 +83,30 @@ func (h *Handler) getBookByID(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) createBook(w http.ResponseWriter, r *http.Request) {
 	reqBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		log.WithFields(log.Fields{
+			"handler": "createBook",
+			"problem": "reading request body",
+		}).Error(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	var book domain.Book
 	if err = json.Unmarshal(reqBytes, &book); err != nil {
+		log.WithFields(log.Fields{
+			"handler": "createBook",
+			"problem": "unmarshaling request",
+		}).Error(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	err = h.booksService.Create(context.TODO(), book)
 	if err != nil {
-		log.Println("createBook() error:", err)
+		log.WithFields(log.Fields{
+			"handler": "createBook",
+			"problem": "service error",
+		}).Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
