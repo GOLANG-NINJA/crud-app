@@ -9,6 +9,10 @@ import (
 // use a single instance of Validate, it caches struct info
 var validate *validator.Validate
 
+func init() {
+	validate = validator.New()
+}
+
 type User struct {
 	ID           int64     `json:"id"`
 	Name         string    `json:"name"`

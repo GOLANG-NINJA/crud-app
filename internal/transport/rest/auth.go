@@ -29,7 +29,7 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.userService.SignUp(r.Context(), inp)
+	err = h.usersService.SignUp(r.Context(), inp)
 	if err != nil {
 		logError("signUp", err)
 		w.WriteHeader(http.StatusInternalServerError)

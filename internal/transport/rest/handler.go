@@ -26,12 +26,13 @@ type User interface {
 
 type Handler struct {
 	booksService Books
-	userService  User
+	usersService User
 }
 
-func NewHandler(books Books) *Handler {
+func NewHandler(books Books, users User) *Handler {
 	return &Handler{
 		booksService: books,
+		usersService: users,
 	}
 }
 

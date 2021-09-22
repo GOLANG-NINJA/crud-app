@@ -10,6 +10,7 @@ import (
 	"github.com/GOLANG-NINJA/crud-app/internal/service"
 	"github.com/GOLANG-NINJA/crud-app/internal/transport/rest"
 	"github.com/GOLANG-NINJA/crud-app/pkg/database"
+	"github.com/GOLANG-NINJA/crud-app/pkg/hash"
 
 	_ "github.com/lib/pq"
 
@@ -48,9 +49,15 @@ func main() {
 	defer db.Close()
 
 	// init deps
+	hasher := hash.NewSHA1Hasher("salt")
+
 	booksRepo := psql.NewBooks(db)
 	booksService := service.NewBooks(booksRepo)
-	handler := rest.NewHandler(booksService)
+
+	usersRepo := psql.NewUsers(db)
+	usersService := service.NewUsers(usersRepo, hasher)
+
+	handler := rest.NewHandler(booksService, usersService)
 
 	// init & run server
 	srv := &http.Server{

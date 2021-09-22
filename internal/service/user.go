@@ -2,9 +2,15 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/GOLANG-NINJA/crud-app/internal/domain"
 )
+
+// PasswordHasher provides hashing logic to securely store passwords.
+type PasswordHasher interface {
+	Hash(password string) (string, error)
+}
 
 type UsersRepository interface {
 	Create(ctx context.Context, user domain.User) error
@@ -12,19 +18,33 @@ type UsersRepository interface {
 }
 
 type Users struct {
-	repo UsersRepository
+	repo   UsersRepository
+	hasher PasswordHasher
 }
 
-func NewUsers(repo UsersRepository) *Users {
+func NewUsers(repo UsersRepository, hasher PasswordHasher) *Users {
 	return &Users{
-		repo: repo,
+		repo:   repo,
+		hasher: hasher,
 	}
 }
 
-func SignUp(ctx context.Context, inp domain.SignUpInput) error {
-	return nil
+func (u *Users) SignUp(ctx context.Context, inp domain.SignUpInput) error {
+	password, err := u.hasher.Hash(inp.Password)
+	if err != nil {
+		return err
+	}
+
+	user := domain.User{
+		Name:         inp.Name,
+		Email:        inp.Email,
+		Password:     password,
+		RegisteredAt: time.Now(),
+	}
+
+	return u.repo.Create(ctx, user)
 }
 
-func SignIn(ctx context.Context, email, password string) (string, error) {
+func (u *Users) SignIn(ctx context.Context, email, password string) (string, error) {
 	return "", nil
 }
