@@ -25,26 +25,26 @@ func NewBooks(repo BooksRepository) *Books {
 	}
 }
 
-func (b *Books) Create(ctx context.Context, book domain.Book) error {
+func (s *Books) Create(ctx context.Context, book domain.Book) error {
 	if book.PublishDate.IsZero() {
 		book.PublishDate = time.Now()
 	}
 
-	return b.repo.Create(ctx, book)
+	return s.repo.Create(ctx, book)
 }
 
-func (b *Books) GetByID(ctx context.Context, id int64) (domain.Book, error) {
-	return b.repo.GetByID(ctx, id)
+func (s *Books) GetByID(ctx context.Context, id int64) (domain.Book, error) {
+	return s.repo.GetByID(ctx, id)
 }
 
-func (b *Books) GetAll(ctx context.Context) ([]domain.Book, error) {
-	return b.repo.GetAll(ctx)
+func (s *Books) GetAll(ctx context.Context) ([]domain.Book, error) {
+	return s.repo.GetAll(ctx)
 }
 
-func (b *Books) Delete(ctx context.Context, id int64) error {
-	return b.repo.Delete(ctx, id)
+func (s *Books) Delete(ctx context.Context, id int64) error {
+	return s.repo.Delete(ctx, id)
 }
 
-func (b *Books) Update(ctx context.Context, id int64, inp domain.UpdateBookInput) error {
-	return b.repo.Update(ctx, id, inp)
+func (s *Books) Update(ctx context.Context, id int64, inp domain.UpdateBookInput) error {
+	return s.repo.Update(ctx, id, inp)
 }

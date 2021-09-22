@@ -55,7 +55,7 @@ func main() {
 	booksService := service.NewBooks(booksRepo)
 
 	usersRepo := psql.NewUsers(db)
-	usersService := service.NewUsers(usersRepo, hasher)
+	usersService := service.NewUsers(usersRepo, hasher, []byte("sample secret"))
 
 	handler := rest.NewHandler(booksService, usersService)
 
