@@ -22,14 +22,20 @@ type UsersRepository interface {
 	GetByCredentials(ctx context.Context, email, password string) (domain.User, error)
 }
 
+type TokensRepository interface {
+	Create(ctx context.Context, token domain.RefreshToken) error
+	Get(ctx context.Context, token string) (domain.RefreshToken, error)
+}
+
 type Users struct {
-	repo   UsersRepository
-	hasher PasswordHasher
+	repo      UsersRepository
+	tokenRepo TokensRepository
+	hasher    PasswordHasher
 
 	hmacSecret []byte
 }
 
-func NewUsers(repo UsersRepository, hasher PasswordHasher, secret []byte) *Users {
+func NewUsers(repo UsersRepository, tokenRepo TokensRepository, hasher PasswordHasher, secret []byte) *Users {
 	return &Users{
 		repo:       repo,
 		hasher:     hasher,
