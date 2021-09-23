@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
 	"strconv"
 	"time"
 
@@ -52,24 +53,33 @@ func (s *Users) SignUp(ctx context.Context, inp domain.SignUpInput) error {
 	return s.repo.Create(ctx, user)
 }
 
-func (s *Users) SignIn(ctx context.Context, inp domain.SignInInput) (string, error) {
+func (s *Users) SignIn(ctx context.Context, inp domain.SignInInput) (string, string, error) {
 	password, err := s.hasher.Hash(inp.Password)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	user, err := s.repo.GetByCredentials(ctx, inp.Email, password)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		Subject:   strconv.Itoa(int(user.ID)),
 		IssuedAt:  time.Now().Unix(),
 		ExpiresAt: time.Now().Add(time.Minute * 15).Unix(),
 	})
+	accessToken, err := t.SignedString(s.hmacSecret)
+	if err != nil {
+		return "", "", err
+	}
 
-	return token.SignedString(s.hmacSecret)
+	refreshToken, err := newRefreshToken()
+	if err != nil {
+		return "", "", err
+	}
+
+	return accessToken, refreshToken, nil
 }
 
 func (s *Users) ParseToken(ctx context.Context, token string) (int64, error) {
@@ -104,4 +114,17 @@ func (s *Users) ParseToken(ctx context.Context, token string) (int64, error) {
 	}
 
 	return int64(id), nil
+}
+
+func newRefreshToken() (string, error) {
+	b := make([]byte, 32)
+
+	s := rand.NewSource(time.Now().Unix())
+	r := rand.New(s)
+
+	if _, err := r.Read(b); err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%x", b), nil
 }
