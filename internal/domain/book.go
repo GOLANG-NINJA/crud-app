@@ -1,12 +1,7 @@
 package domain
 
 import (
-	"errors"
 	"time"
-)
-
-var (
-	ErrBookNotFound = errors.New("book not found")
 )
 
 type Book struct {
