@@ -2,6 +2,7 @@ package rest
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -60,7 +61,7 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := h.usersService.SignIn(r.Context(), inp)
+	accessToken, refreshToken, err := h.usersService.SignIn(r.Context(), inp)
 	if err != nil {
 		logError("signIn", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -68,7 +69,7 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response, err := json.Marshal(map[string]string{
-		"token": token,
+		"token": accessToken,
 	})
 	if err != nil {
 		logError("signIn", err)
@@ -76,6 +77,7 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Add("Set-Cookie", fmt.Sprintf("refresh-token='%s'; HttpOnly", refreshToken))
 	w.Header().Add("Content-Type", "application/json")
 	w.Write(response)
 }
