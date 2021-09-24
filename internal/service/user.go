@@ -85,6 +85,14 @@ func (s *Users) SignIn(ctx context.Context, inp domain.SignInInput) (string, str
 		return "", "", err
 	}
 
+	if err := s.tokenRepo.Create(ctx, domain.RefreshToken{
+		UserID:    user.ID,
+		Token:     refreshToken,
+		ExpiresAt: time.Now().Add(time.Hour * 24 * 30),
+	}); err != nil {
+		return "", "", err
+	}
+
 	return accessToken, refreshToken, nil
 }
 

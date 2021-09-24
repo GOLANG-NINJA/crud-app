@@ -23,21 +23,15 @@ func (r *Tokens) Create(ctx context.Context, token domain.RefreshToken) error {
 }
 
 func (r *Tokens) Get(ctx context.Context, token string) (domain.RefreshToken, error) {
-	tx, err := r.db.Begin()
-	if err != nil {
-		return domain.RefreshToken{}, err
-	}
-	defer tx.Rollback()
-
 	var t domain.RefreshToken
-	err := tx.QueryRow("SELECT id, user_id, token, expires_at FROM refresh_tokens WHERE token=$1", token).
+	err := r.db.QueryRow("SELECT id, user_id, token, expires_at FROM refresh_tokens WHERE token=$1", token).
 		Scan(&t.ID, &t.UserID, &t.Token, &t.ExpiresAt)
 
 	return t, err
 }
 
-func (r *Tokens) Update(ctx context.Context, id int, token domain.RefreshToken) error {
-	_, err := r.db.Exec("UPDATE refresh_tokens SET token=$1, expires_at=$2 WHERE id=$3", token.Token, token.ExpiresAt, id)
+func (r *Tokens) Delete(ctx context.Context, id int) error {
+	_, err := r.db.Exec("DELETE FROM refresh_tokens WHERE id=$3", id)
 
 	return err
 }
