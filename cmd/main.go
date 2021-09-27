@@ -8,6 +8,7 @@ import (
 	"github.com/GOLANG-NINJA/crud-app/internal/config"
 	"github.com/GOLANG-NINJA/crud-app/internal/repository/psql"
 	"github.com/GOLANG-NINJA/crud-app/internal/service"
+	grpc_client "github.com/GOLANG-NINJA/crud-app/internal/transport/grpc"
 	"github.com/GOLANG-NINJA/crud-app/internal/transport/rest"
 	"github.com/GOLANG-NINJA/crud-app/pkg/database"
 	"github.com/GOLANG-NINJA/crud-app/pkg/hash"
@@ -56,7 +57,13 @@ func main() {
 
 	usersRepo := psql.NewUsers(db)
 	tokensRepo := psql.NewTokens(db)
-	usersService := service.NewUsers(usersRepo, tokensRepo, hasher, []byte("sample secret"))
+
+	auditClient, err := grpc_client.NewClient(9000)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	usersService := service.NewUsers(usersRepo, tokensRepo, auditClient, hasher, []byte("sample secret"))
 
 	handler := rest.NewHandler(booksService, usersService)
 

@@ -9,7 +9,9 @@ import (
 	"time"
 
 	"github.com/GOLANG-NINJA/crud-app/internal/domain"
+	audit "github.com/GOLANG-NINJA/crud-audit-log/pkg/domain"
 	"github.com/golang-jwt/jwt"
+	"github.com/sirupsen/logrus"
 )
 
 // PasswordHasher provides hashing logic to securely store passwords.
@@ -27,19 +29,26 @@ type SessionsRepository interface {
 	Get(ctx context.Context, token string) (domain.RefreshSession, error)
 }
 
+type AuditClient interface {
+	SendLogRequest(ctx context.Context, req audit.LogItem) error
+}
+
 type Users struct {
 	repo         UsersRepository
 	sessionsRepo SessionsRepository
 	hasher       PasswordHasher
 
+	auditClient AuditClient
+
 	hmacSecret []byte
 }
 
-func NewUsers(repo UsersRepository, sessionsRepo SessionsRepository, hasher PasswordHasher, secret []byte) *Users {
+func NewUsers(repo UsersRepository, sessionsRepo SessionsRepository, auditClient AuditClient, hasher PasswordHasher, secret []byte) *Users {
 	return &Users{
 		repo:         repo,
 		sessionsRepo: sessionsRepo,
 		hasher:       hasher,
+		auditClient:  auditClient,
 		hmacSecret:   secret,
 	}
 }
@@ -57,7 +66,27 @@ func (s *Users) SignUp(ctx context.Context, inp domain.SignUpInput) error {
 		RegisteredAt: time.Now(),
 	}
 
-	return s.repo.Create(ctx, user)
+	if err := s.repo.Create(ctx, user); err != nil {
+		return err
+	}
+
+	user, err = s.repo.GetByCredentials(ctx, inp.Email, password)
+	if err != nil {
+		return err
+	}
+
+	if err := s.auditClient.SendLogRequest(ctx, audit.LogItem{
+		Action:    audit.ACTION_REGISTER,
+		Entity:    audit.ENTITY_USER,
+		EntityID:  user.ID,
+		Timestamp: time.Now(),
+	}); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"method": "Users.SignUp",
+		}).Error("failed to send log request:", err)
+	}
+
+	return nil
 }
 
 func (s *Users) SignIn(ctx context.Context, inp domain.SignInInput) (string, string, error) {
