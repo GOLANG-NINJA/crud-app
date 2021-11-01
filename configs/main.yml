@@ -1,2 +1,5 @@
 server:
   port: 8080
+
+auth:
+  token_ttl: 15m
