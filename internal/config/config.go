@@ -1,6 +1,8 @@
 package config
 
 import (
+	"time"
+
 	"github.com/kelseyhightower/envconfig"
 	"github.com/spf13/viper"
 )
@@ -11,6 +13,10 @@ type Config struct {
 	Server struct {
 		Port int `mapstructure:"port"`
 	} `mapstructure:"server"`
+
+	Auth struct {
+		TokenTTL time.Duration `mapstructure:"token_ttl"`
+	} `mapstructure:"auth"`
 }
 
 type Postgres struct {

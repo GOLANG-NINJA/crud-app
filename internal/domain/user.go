@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"errors"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -12,6 +13,8 @@ var validate *validator.Validate
 func init() {
 	validate = validator.New()
 }
+
+var ErrUserNotFound = errors.New("user with such credentials not found")
 
 type User struct {
 	ID           int64     `json:"id"`

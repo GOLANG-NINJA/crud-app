@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"strconv"
@@ -26,13 +27,15 @@ type Users struct {
 	hasher PasswordHasher
 
 	hmacSecret []byte
+	tokenTtl   time.Duration
 }
 
-func NewUsers(repo UsersRepository, hasher PasswordHasher, secret []byte) *Users {
+func NewUsers(repo UsersRepository, hasher PasswordHasher, secret []byte, ttl time.Duration) *Users {
 	return &Users{
 		repo:       repo,
 		hasher:     hasher,
 		hmacSecret: secret,
+		tokenTtl:   ttl,
 	}
 }
 
@@ -60,13 +63,17 @@ func (s *Users) SignIn(ctx context.Context, inp domain.SignInInput) (string, err
 
 	user, err := s.repo.GetByCredentials(ctx, inp.Email, password)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", domain.ErrUserNotFound
+		}
+
 		return "", err
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		Subject:   strconv.Itoa(int(user.ID)),
 		IssuedAt:  time.Now().Unix(),
-		ExpiresAt: time.Now().Add(time.Minute * 15).Unix(),
+		ExpiresAt: time.Now().Add(s.tokenTtl).Unix(),
 	})
 
 	return token.SignedString(s.hmacSecret)
