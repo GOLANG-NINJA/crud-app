@@ -79,7 +79,7 @@ func (b *Books) Update(ctx context.Context, id int64, inp domain.UpdateBookInput
 
 	if inp.PublishDate != nil {
 		setValues = append(setValues, fmt.Sprintf("publish_date=$%d", argId))
-		args = append(args, *inp.Author)
+		args = append(args, *inp.PublishDate)
 		argId++
 	}
 
@@ -91,7 +91,7 @@ func (b *Books) Update(ctx context.Context, id int64, inp domain.UpdateBookInput
 
 	setQuery := strings.Join(setValues, ", ")
 
-	query := fmt.Sprintf("UPDATE books SET %s WHERE id=%d", setQuery, argId+1)
+	query := fmt.Sprintf("UPDATE books SET %s WHERE id=$%d", setQuery, argId)
 	args = append(args, id)
 
 	_, err := b.db.Exec(query, args...)
