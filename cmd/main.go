@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
 
+	"github.com/GOLANG-NINJA/crud-app/internal/config"
 	"github.com/GOLANG-NINJA/crud-app/internal/repository/psql"
 	"github.com/GOLANG-NINJA/crud-app/internal/service"
 	"github.com/GOLANG-NINJA/crud-app/internal/transport/rest"
@@ -13,15 +15,27 @@ import (
 	_ "github.com/lib/pq"
 )
 
+const (
+	CONFIG_DIR  = "configs"
+	CONFIG_FILE = "main"
+)
+
 func main() {
+	cfg, err := config.New(CONFIG_DIR, CONFIG_FILE)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("config: %+v\n", cfg)
+
 	// init db
 	db, err := database.NewPostgresConnection(database.ConnectionInfo{
-		Host:     "localhost",
-		Port:     5432,
-		Username: "postgres",
-		DBName:   "postgres",
-		SSLMode:  "disable",
-		Password: "qwerty123",
+		Host:     cfg.DB.Host,
+		Port:     cfg.DB.Port,
+		Username: cfg.DB.Username,
+		DBName:   cfg.DB.Name,
+		SSLMode:  cfg.DB.SSLMode,
+		Password: cfg.DB.Password,
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -35,7 +49,7 @@ func main() {
 
 	// init & run server
 	srv := &http.Server{
-		Addr:    ":8080",
+		Addr:    fmt.Sprintf(":%d", cfg.Server.Port),
 		Handler: handler.InitRouter(),
 	}
 
