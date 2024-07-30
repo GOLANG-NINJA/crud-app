@@ -142,7 +142,7 @@ func (h *Handler) getAllBooks(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) updateBook(w http.ResponseWriter, r *http.Request) {
 	id, err := getIdFromRequest(r)
 	if err != nil {
-		log.Println("error:", err)
+		log.Println("updateBook() error:", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -161,7 +161,7 @@ func (h *Handler) updateBook(w http.ResponseWriter, r *http.Request) {
 
 	err = h.booksService.Update(context.TODO(), id, inp)
 	if err != nil {
-		log.Println("error:", err)
+		log.Println("updateBook() error:", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
